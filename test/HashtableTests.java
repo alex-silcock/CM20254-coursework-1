@@ -46,10 +46,10 @@ public class HashtableTests {
     public void collisions1() {
         Hashtable table = new Hashtable(4);
         String[] words = {"AaAa", "BBBB", "AaBB", "BBAa"};
+
         for (String s : words) {
             table.add(s);
         }
-
         assertEquals("AaAa", table.get(0));
         assertEquals("BBBB", table.get(1));
         assertEquals("AaBB", table.get(2));
@@ -60,10 +60,10 @@ public class HashtableTests {
     public void wrapAround1() {
         Hashtable table = new Hashtable(5);
         String[] words = {"abcdef", "abcdefg", "abcdegH", "abcdeh)"};
+
         for (String s : words) {
             table.add(s);
         }
-
         assertEquals("abcdeh)", table.get(0));
         assertNull(table.get(1));
         assertEquals("abcdefg", table.get(2));
@@ -75,26 +75,42 @@ public class HashtableTests {
     @Test
     public void delete1() {
         Hashtable table = new Hashtable(8);
-        String[] words = {"apple0", "apple2", "apple9", "Apple1"};
+        String[] words = {"apple0", "apple2", "apple9", "Apple1", "Apple2"};
         assertFalse(table.search("Apple1"));
 
         for (String s : words) {
             table.add(s);
         }
-        assertEquals("Apple1", table.get(1));
+        assertEquals("Apple2", table.get(2));
         table.delete("Apple1");
-        assertEquals("-- Placeholder --", table.get(1));
+        table.printTable();
+        assertTrue(table.search("Apple2"));
+    }
+
+    @Test
+    public void delete2() {
+        Hashtable table = new Hashtable(8);
+        String[] words = {"apple0", "apple1", "apple2", "Apple1", "Apple2"};
+
+        for (String s : words) {
+            table.add(s);
+        }
+        table.delete("apple1");
+        assertEquals("apple2", table.get(0));
+        assertEquals("Apple2", table.get(1));
+        assertEquals("Apple1", table.get(7));
+        assertTrue(table.search("Apple2"));
     }
 
     @Test
     public void addToFullTable() {
         Hashtable table = new Hashtable(4);
         String[] words = {"apple1", "apple2", "apple3", "apple4"};
+
         for (String s : words) {
             table.add(s);
         }
         table.add("apple5");
-
         assertEquals(words[1], table.get(0));
         assertEquals(words[2], table.get(1));
         assertEquals(words[3], table.get(2));
@@ -107,6 +123,7 @@ public class HashtableTests {
     public void searchingFullTable() {
         Hashtable table = new Hashtable(4);
         String[] words = {"apple1", "apple2", "apple3", "apple4"};
+
         for (String s : words) {
             table.add(s);
         }

@@ -66,8 +66,6 @@ public class Hashtable {
                 }
                 probeCount++;
 
-
-
                 // handle the wrap around
                 if (hashValue + probeCount == this.capacity) {
                     // if we have already wrapped around, word not in table
@@ -82,11 +80,35 @@ public class Hashtable {
         return false;
     }
 
+    public void deleteAndRehash(int hashValue) {
+        int nextHash;
+        if (hashValue == this.capacity - 1) {
+            nextHash = 0;
+        } else {
+            nextHash = hashValue + 1;
+        }
+        while (this.storageArray[nextHash] != null) {
+            String key = this.storageArray[nextHash];
+            this.storageArray[nextHash] = null;
+            add(key);
+            nextHash ++;
+            if (nextHash > this.capacity) {
+                nextHash = 0;
+            }
+        }
+    }
+
     public void delete(String key) {
+        // TODO - deleting - reorganise the cluster from the free slot we've created, to re-fill that slot if necessary
+        // Probe the next values, if the hash value is the value of the index we deleted from then shift to that index
         int hashValue = getHashValue(key);
         if (this.storageArray[hashValue] == null) { return; }
         if (this.storageArray[hashValue].compareTo(key) == 0) {
-            this.storageArray[hashValue] = "-- Placeholder --";
+            this.storageArray[hashValue] = null;
+            // TODO - iterate to the next value which is null, rehashing each value and inserting it into the hash table again
+
+            deleteAndRehash(hashValue);
+
         }
         else {
             // linear probe
@@ -94,7 +116,8 @@ public class Hashtable {
             boolean alreadyWrapped = false;
             while (this.storageArray[hashValue + probeCount] != null) {
                 if (this.storageArray[hashValue + probeCount].compareTo(key) == 0) {
-                    this.storageArray[hashValue + probeCount] = "-- Placeholder --";
+                    this.storageArray[hashValue + probeCount] = null;
+                    deleteAndRehash(hashValue + probeCount);
                 }
                 probeCount++;
                 // handle the wrap around
@@ -121,21 +144,21 @@ public class Hashtable {
     }
 
     public static void main (String[] args) {
-        // TODO - write code for unit tests
         // TODO - java docs code
-        // TODO - working with the placeholder, that can be replaced
         // abcdefg and abcdegH and abcdeh) have the same hash value
         // AaAa BBBB AaBB BBAa have the same hash value
         // AaAaAa AaAaBB AaBBAa AaBBBB BBAaAa BBAaBB BBBBAa BBBBBB
-        Hashtable table = new Hashtable(4);
-        String[] words = {"apple1", "apple2", "apple3", "apple4"};
+        Hashtable table = new Hashtable(8);
+        String[] words = {"apple0", "apple1", "apple2", "Apple1", "Apple2"};
+
         for (String s : words) {
             table.add(s);
+            System.out.println(s + " " + table.getHashValue(s));
         }
-        table.add("apple5");
-
-        table.search("apple5");
-
+        table.printTable();
+        table.delete("apple1");
+        System.out.println();
+        table.printTable();
     }
 
 }
