@@ -1,51 +1,40 @@
-public class Hashtable {
-    // uses open addressing to handle collisions
-    // hash table stores String keys
-    // to compute hash value:
-    //      int hashcode = myString.hashCode()
-    //      int hashValue = (hashcode & 0x7fffffff) % capacity;
-    // capacity is size of hashtable
-    // bit mask changes negative values to positive
+import java.awt.desktop.SystemSleepEvent;
 
+public class Hashtable {
     int capacity;
     int filledSlots = 0;
     String[] storageArray;
 
     public Hashtable(int size) {
-	// Add code here for your constructor
         this.capacity = size;
         this.storageArray = new String[this.capacity];
     }
 
     public int getHashValue(String key) {
-        int hashcode = key.hashCode();
-        int hashValue = (hashcode & 0x7fffffff) % this.capacity;
-        return hashValue;
+        return (key.hashCode() & 0x7fffffff) % this.capacity;
     }
 
     public void add(String key) {
-	// Add code here for your add method, using linear probing to resolve collisions
-    // if table is full, add operation does nothing - shouldn't destroy any entries
-    // does not have to add strings that are already in the table
-    // linear probing if collision - search forwards until finds an empty slot, wrap around at end of array
-    if (this.filledSlots == this.capacity) { return; }
-
-    int hashValue = getHashValue(key);
-    if (this.storageArray[hashValue] == null){
-            this.storageArray[hashValue] = key;
-    }
-    else {
-        // linear probe
-        int probeCount = 0;
-        while (this.storageArray[hashValue + probeCount] != null) {
-            probeCount++;
-            // handle the wrap around
-            if (hashValue + probeCount == this.capacity) {
-                probeCount = -hashValue;
-            }
+        if (this.filledSlots == this.capacity || search(key)) {
+            return;
         }
-        this.storageArray[hashValue + probeCount] = key;
-    }
+
+        int hashValue = getHashValue(key);
+        if (this.storageArray[hashValue] == null){
+            this.storageArray[hashValue] = key;
+        }
+        else {
+            // linear probe
+            int probeCount = 0;
+            while (this.storageArray[hashValue + probeCount] != null) {
+                probeCount++;
+                // handle the wrap around
+                if (hashValue + probeCount == this.capacity) {
+                    probeCount = -hashValue;
+                }
+            }
+            this.storageArray[hashValue + probeCount] = key;
+        }
         this.filledSlots += 1;
     }
 
@@ -81,34 +70,33 @@ public class Hashtable {
     }
 
     public void deleteAndRehash(int hashValue) {
+        this.storageArray[hashValue] = null;
         int nextHash;
         if (hashValue == this.capacity - 1) {
             nextHash = 0;
         } else {
             nextHash = hashValue + 1;
         }
+
         while (this.storageArray[nextHash] != null) {
             String key = this.storageArray[nextHash];
             this.storageArray[nextHash] = null;
+            this.filledSlots -= 1;
             add(key);
-            nextHash ++;
-            if (nextHash > this.capacity) {
+            nextHash++;
+
+            if (nextHash == this.capacity) {
                 nextHash = 0;
             }
         }
+        this.filledSlots -= 1;
     }
 
     public void delete(String key) {
-        // TODO - deleting - reorganise the cluster from the free slot we've created, to re-fill that slot if necessary
-        // Probe the next values, if the hash value is the value of the index we deleted from then shift to that index
         int hashValue = getHashValue(key);
         if (this.storageArray[hashValue] == null) { return; }
         if (this.storageArray[hashValue].compareTo(key) == 0) {
-            this.storageArray[hashValue] = null;
-            // TODO - iterate to the next value which is null, rehashing each value and inserting it into the hash table again
-
             deleteAndRehash(hashValue);
-
         }
         else {
             // linear probe
@@ -116,7 +104,6 @@ public class Hashtable {
             boolean alreadyWrapped = false;
             while (this.storageArray[hashValue + probeCount] != null) {
                 if (this.storageArray[hashValue + probeCount].compareTo(key) == 0) {
-                    this.storageArray[hashValue + probeCount] = null;
                     deleteAndRehash(hashValue + probeCount);
                 }
                 probeCount++;
@@ -125,12 +112,11 @@ public class Hashtable {
                     if (alreadyWrapped) {
                         return;
                     }
-                    alreadyWrapped = true;
                     probeCount = -hashValue;
+                    alreadyWrapped = true;
                 }
             }
         }
-
     }
 
     public String get(int i) {
@@ -138,9 +124,20 @@ public class Hashtable {
     }
 
     public void printTable() {
+//        int cluster_length = 0;
+//        int max_cluster = 0;
         for (int i = 0; i < this.capacity; i++) {
             System.out.println(i + " : " + this.storageArray[i]);
+//            if (this.storageArray[i] != null) {
+//                cluster_length ++;
+//            } else {
+//                if (cluster_length > max_cluster) {
+//                    max_cluster = cluster_length;
+//                }
+//                cluster_length = 0;
+//            }
         }
+//        System.out.println(max_cluster);
     }
 
     public static void main (String[] args) {
@@ -149,16 +146,14 @@ public class Hashtable {
         // AaAa BBBB AaBB BBAa have the same hash value
         // AaAaAa AaAaBB AaBBAa AaBBBB BBAaAa BBAaBB BBBBAa BBBBBB
         Hashtable table = new Hashtable(8);
-        String[] words = {"apple0", "apple1", "apple2", "Apple1", "Apple2"};
+        String[] words = {"AaAaAa" , "AaAaBB",  "AaBBAa",  "AaBBBB",  "BBAaAa",  "BBAaBB",  "BBBBAa", "BBBBBB"};
 
         for (String s : words) {
             table.add(s);
-            System.out.println(s + " " + table.getHashValue(s));
         }
         table.printTable();
-        table.delete("apple1");
+        table.delete("AaAaAa");
         System.out.println();
         table.printTable();
     }
-
 }
