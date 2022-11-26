@@ -1,5 +1,3 @@
-import java.awt.desktop.SystemSleepEvent;
-
 public class Hashtable {
     int capacity;
     int filledSlots = 0;
