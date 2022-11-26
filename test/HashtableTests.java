@@ -218,4 +218,10 @@ public class HashtableTests {
             assertNull(table.get(i));
         }
     }
+
+    @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)
+    public void outOfRangeGet() {
+        Hashtable table = new Hashtable(5);
+        table.get(6);
+    }
 }
