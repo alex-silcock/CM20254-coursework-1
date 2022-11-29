@@ -1,17 +1,42 @@
+/**
+ * Hashtable
+ *
+ * @author Alex Silcock
+ * @version 1.0
+ */
 public class Hashtable {
     int capacity;
     int filledSlots = 0;
     String[] storageArray;
 
+    /**
+     * Constructor for the hash table
+     *
+     * @param size
+     *      The number of strings that can be stored in the hash table
+     */
     public Hashtable(int size) {
         this.capacity = size;
         this.storageArray = new String[this.capacity];
     }
 
+    /**
+     * Returns the Hash Value for the given key
+     *
+     * @param key
+     *      The string to be hashed
+     * @return The hash value of the string
+     */
     public int getHashValue(String key) {
         return (key.hashCode() & 0x7fffffff) % this.capacity;
     }
 
+    /**
+     * Adds a string to the hash table
+     *
+     * @param key
+     *      The string to be added to the hash table
+     */
     public void add(String key) {
         if (this.filledSlots == this.capacity || search(key)) {
             return;
@@ -36,8 +61,16 @@ public class Hashtable {
         this.filledSlots += 1;
     }
 
+    /**
+     * Searches to see if a string exists in the hash table
+     *
+     * @param key
+     *      The string to be searched for
+     * @return
+     *      True if the string exists in the hash table, False if the string doesn't exist
+     *      in the hash table
+     */
     public boolean search(String key) {
-	// Add code here for your search method
         int hashValue = getHashValue(key);
         if (this.storageArray[hashValue] == null) { return false; }
         if (this.storageArray[hashValue].compareTo(key) == 0) {
@@ -67,6 +100,11 @@ public class Hashtable {
         return false;
     }
 
+    /**
+     * Deletes the string from the hash table and rehashes everything after the deleted string
+     * @param hashValue
+     *      The hash value of the string to be deleted
+     */
     public void deleteAndRehash(int hashValue) {
         this.storageArray[hashValue] = null;
         int nextHash;
@@ -90,6 +128,11 @@ public class Hashtable {
         this.filledSlots -= 1;
     }
 
+    /**
+     * Deletes a string from the hash table
+     * @param key
+     *      The string to be deleted from the table
+     */
     public void delete(String key) {
         int hashValue = getHashValue(key);
         if (this.storageArray[hashValue] == null) { return; }
@@ -107,35 +150,58 @@ public class Hashtable {
                 probeCount++;
                 // handle the wrap around
                 if (hashValue + probeCount == this.capacity) {
-                    if (alreadyWrapped) {
-                        return;
-                    }
+                    if (alreadyWrapped) { return; }
                     probeCount = -hashValue;
                     alreadyWrapped = true;
                 }
+
             }
         }
     }
 
+    /**
+     * Returns the string at index i in the hash table
+     * @param i
+     *      The index to be returned
+     * @return
+     *      String at index i
+     */
     public String get(int i) {
         return this.storageArray[i];
     }
 
+    /**
+     * Prints the hash table
+     */
     public void printTable() {
-//        int cluster_length = 0;
-//        int max_cluster = 0;
         for (int i = 0; i < this.capacity; i++) {
             System.out.println(i + " : " + this.storageArray[i]);
-//            if (this.storageArray[i] != null) {
-//                cluster_length ++;
-//            } else {
-//                if (cluster_length > max_cluster) {
-//                    max_cluster = cluster_length;
-//                }
-//                cluster_length = 0;
-//            }
         }
-//        System.out.println(max_cluster);
+    }
+
+    /**
+     * Finds the maximum cluster in the hash table
+     * @return
+     *      int - the maximum cluster
+     */
+    public int getMaxCluster() {
+        // TODO - find the cluster if there is a wrap around
+        int cluster_length = 0;
+        int max_cluster = 0;
+        if (this.filledSlots == this.capacity) { return this.filledSlots; }
+
+        for (int i = 0; i < this.capacity; i++) {
+            if (this.storageArray[i] == null) {
+                if (cluster_length > max_cluster) {
+                    max_cluster = cluster_length;
+                }
+                cluster_length = 0;
+            } else {
+                cluster_length++;
+            }
+
+        }
+        return max_cluster;
     }
 
     public static void main (String[] args) {
