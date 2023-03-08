@@ -203,21 +203,4 @@ public class Hashtable {
         }
         return max_cluster;
     }
-
-    public static void main (String[] args) {
-        // TODO - java docs code
-        // abcdefg and abcdegH and abcdeh) have the same hash value
-        // AaAa BBBB AaBB BBAa have the same hash value
-        // AaAaAa AaAaBB AaBBAa AaBBBB BBAaAa BBAaBB BBBBAa BBBBBB
-        Hashtable table = new Hashtable(8);
-        String[] words = {"AaAaAa" , "AaAaBB",  "AaBBAa",  "AaBBBB",  "BBAaAa",  "BBAaBB",  "BBBBAa", "BBBBBB"};
-
-        for (String s : words) {
-            table.add(s);
-        }
-        table.printTable();
-        table.delete("AaAaAa");
-        System.out.println();
-        table.printTable();
-    }
 }
